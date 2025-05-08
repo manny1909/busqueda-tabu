@@ -41,7 +41,7 @@ export function busquedaTabu(
             if (listaTabu.length > tamañoListaTabu) {
                 listaTabu = listaTabu.slice(0, tamañoListaTabu);
             }
-            console.log('Lista tabu en iteración ', iter, listaTabu)
+            console.log(listaTabu)
         }
     }
 
@@ -83,7 +83,6 @@ function actualizarTabu(
             nuevaLista[0] = movimiento;
         }
     }
-
     return nuevaLista;
 }
 function extraerMovimiento(
