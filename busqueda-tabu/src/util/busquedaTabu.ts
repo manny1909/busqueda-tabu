@@ -1,6 +1,7 @@
-import { MatrizTransporte, Movimiento, ResultadoBusquedaTabu } from "./models/models";
+import { MatrizTransporte, Movimiento, ResultadoBusquedaTabu } from "../models/models";
 import {
     calcularPenalizacion,
+    clonarListaTabu,
     clonarMatriz,
     evaluarCostoTotal
 } from "./utilidadesMatriz";
@@ -8,7 +9,7 @@ import {
 export function busquedaTabu(
     solucionInicial: MatrizTransporte,
     iteracionesMax: number,
-    tamañoListaTabu: number
+    tamanioListaTabu: number
 ): ResultadoBusquedaTabu {
     let solucionActual = clonarMatriz(solucionInicial);
     let mejorSolucion = clonarMatriz(solucionInicial);
@@ -16,7 +17,7 @@ export function busquedaTabu(
     const historialCostos: number[] = [costoMejor];
 
     let listaTabu: Movimiento[][] = [];
-
+    let historialListaTabu: Movimiento[][][] = [];
     for (let iter = 0; iter < iteracionesMax; iter++) {
         const vecinos = generarVecinos(solucionActual);
         if (!vecinos.length) break;
@@ -37,15 +38,16 @@ export function busquedaTabu(
                 costoMejor = costoVecino;
             }
 
-            listaTabu = actualizarTabu(movimiento, listaTabu, esTabu);
-            if (listaTabu.length > tamañoListaTabu) {
-                listaTabu = listaTabu.slice(0, tamañoListaTabu);
+            listaTabu = actualizarTabu(movimiento, listaTabu, tamanioListaTabu, esTabu);
+            if (listaTabu.length > tamanioListaTabu) {
+                listaTabu = listaTabu.slice(0, tamanioListaTabu);
             }
-            console.log('Lista tabu en iteración ', iter, listaTabu)
+            historialListaTabu.push(clonarListaTabu(listaTabu));
         }
     }
+    console.log('historial lista tabu', historialListaTabu)
 
-    return { mejorSolucion, costoMejor, historialCostos };
+    return { mejorSolucion, costoMejor, historialCostos, historialListaTabu };
 }
 // Devuelve el índice del vecino con menor costo total (costo + penalización).
 function indiceMejorVecino(vecinos: MatrizTransporte[]): number {
@@ -65,24 +67,22 @@ function indiceMejorVecino(vecinos: MatrizTransporte[]): number {
 function actualizarTabu(
     movimiento: Movimiento[],
     listaTabu: Movimiento[][],
+    tamanioListaTabu: number,
     esTabu: boolean
 ): Movimiento[][] {
-    const nuevaLista = [...listaTabu];
+    let nuevaLista = [...listaTabu];
 
-    if (!esTabu) {
-        for (let i = nuevaLista.length - 1; i >= 1; i--) {
-            nuevaLista[i] = nuevaLista[i - 1];
-        }
-        nuevaLista[0] = movimiento;
-    } else {
-        const pos = nuevaLista.findIndex(m => compararMovimientos(m, movimiento));
-        if (pos !== 0 && pos !== -1) {
-            for (let i = pos; i >= 1; i--) {
-                nuevaLista[i] = nuevaLista[i - 1];
-            }
-            nuevaLista[0] = movimiento;
-        }
-    }
+    if (esTabu) {
+        nuevaLista = nuevaLista.filter(m => !compararMovimientos(m, movimiento));
+      }
+    
+      // Agregar al inicio
+      nuevaLista.unshift(movimiento);
+    
+      // Respetar tamaño máximo
+      if (nuevaLista.length > tamanioListaTabu) {
+        nuevaLista.pop(); // elimina el más antiguo
+      }
 
     return nuevaLista;
 }

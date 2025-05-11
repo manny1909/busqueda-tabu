@@ -12,6 +12,7 @@ export interface ResultadoBusquedaTabu {
     mejorSolucion: MatrizTransporte;
     costoMejor: number;
     historialCostos: number[];
+    historialListaTabu: Movimiento[][][];
 }
 
 export interface Movimiento {

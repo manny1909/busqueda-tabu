@@ -1,4 +1,4 @@
-import { MatrizTransporte } from "./models/models";
+import { MatrizTransporte, Movimiento } from "../models/models";
 
 const matriz: MatrizTransporte = [
     [{ costo: 5, asignacion: 0 }, { costo: 1, asignacion: 0 }, { costo: 2, asignacion: 0 }, { costo: 3, asignacion: 0 }, { costo: 4, asignacion: 0 }, { costo: 7, asignacion: 0 }], // G
@@ -62,6 +62,12 @@ export function clonarMatriz(matriz: MatrizTransporte): MatrizTransporte {
         fila.map(celda => ({ costo: celda.costo, asignacion: celda.asignacion }))
     );
 }
+export function clonarListaTabu(lista: Movimiento[][]): Movimiento[][] {
+  return lista.map(movimientos =>
+    movimientos.map(mov => ({ ...mov }))
+  );
+}
+
 
 export function calcularPenalizacion(matriz: MatrizTransporte): number {
     let excesoOferta = 0;
